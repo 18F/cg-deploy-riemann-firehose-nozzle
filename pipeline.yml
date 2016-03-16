@@ -7,9 +7,9 @@ jobs:
       trigger: true
   - put: deploy-influxdb-firehose-nozzle-app
     params:
-      manifest: influxdb-firehose-nozzle-config/manifest.yml
-      path: influxdb-firehose-nozzle-config
-      current_app_name: influxdb-firehose-nozzle-config
+      manifest: influxdb-firehose-nozzle-app/manifest.yml
+      path: influxdb-firehose-nozzle-app
+      current_app_name: influxdb-firehose-nozzle
       environment_variables:
         NOZZLE_INFLUXDB_DATABASE: {{influxdb-database}}
         NOZZLE_INFLUXDB_URL: {{influxdb-url}}
