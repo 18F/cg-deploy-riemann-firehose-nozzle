@@ -1,0 +1,65 @@
+---
+jobs:
+- name: push-influxdb-firehose-nozzle
+  plan:
+  - aggregate:
+    - get: influxdb-firehose-nozzle
+      trigger: true
+  - put: deploy-influxdb-firehose-nozzle-app
+    params:
+      manifest: influxdb-firehose-nozzle-config/manifest.yml
+      path: influxdb-firehose-nozzle-config
+      current_app_name: influxdb-firehose-nozzle-config
+      environment_variables:
+        NOZZLE_INFLUXDB_DATABASE: {{ influxdb-database }}
+        NOZZLE_INFLUXDB_URL: {{ influxdb-url }}
+        NOZZLE_INFLUXDB_PASSWORD: {{ influxdb-password }}
+        NOZZLE_METRICPREFIX: {{ metric-prefix }}
+        NOZZLE_INFLUXDB_USER: {{ influxdb-user }}
+        NOZZLE_UAAURL: {{ uaa-url }}
+        NOZZLE_USERNAME: {{ username }}
+        NOZZLE_PASSWORD: {{ password }}
+        NOZZLE_INSECURESSLSKIPVERIFY: {{ insecure-ssl-skip-verify }}
+        NOZZLE_TRAFFICCONTROLLERURL: {{ traffic-controller-url }}
+        NOZZLE_DEPLOYMENT: {{ cf-deployment }}
+
+    on_failure:
+      put: slack
+      params:
+        text: |
+          :x: FAILED to deploy influxdb-firehose-nozzle on production
+          <https://ci.cloud.gov/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+        channel: {{slack-channel}}
+        username: {{slack-username}}
+        icon_url: {{slack-icon-url}}
+    on_success:
+      put: slack
+      params:
+        text: |
+          :white_check_mark: Successfully deployed influxdb-firehose-nozzle on production
+          <https://ci.cloud.gov/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+        channel: {{slack-channel}}
+        username: {{slack-username}}
+        icon_url: {{slack-icon-url}}
+
+resources:
+- name: influxdb-firehose-nozzle-app
+  type: git
+  source:
+    uri: {{influxdb-firehose-nozzle-app-git-url}}
+    branch: {{influxdb-firehose-nozzle-app-git-branch}}
+
+- name: deploy-influxdb-firehose-nozzle-app
+  type: cf
+  source:
+    api: {{cf-api-url}}
+    username: {{cf-deploy-username}}
+    password: {{cf-deploy-password}}
+    organization: {{cf-organization}}
+    space: {{cf-space}}
+    skip_cert_check: false
+
+- name: slack
+  type: slack-notification
+  source:
+    url: {{slack-webhook-url}}
