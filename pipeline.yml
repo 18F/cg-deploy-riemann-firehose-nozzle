@@ -1,21 +1,20 @@
 ---
 jobs:
-- name: push-influxdb-firehose-nozzle
+- name: push-riemann-firehose-nozzle
   plan:
   - aggregate:
-    - get: influxdb-firehose-nozzle-app
+    - get: riemann-firehose-nozzle-app
       trigger: true
-  - put: deploy-influxdb-firehose-nozzle-app
+  - put: deploy-riemann-firehose-nozzle-app
     params:
-      manifest: influxdb-firehose-nozzle-app/manifest.yml
-      path: influxdb-firehose-nozzle-app
-      current_app_name: influxdb-firehose-nozzle
+      manifest: riemann-firehose-nozzle-app/manifest.yml
+      path: riemann-firehose-nozzle-app
+      current_app_name: riemann-firehose-nozzle
       environment_variables:
-        NOZZLE_INFLUXDB_DATABASE: {{influxdb-database}}
-        NOZZLE_INFLUXDB_URL: {{influxdb-url}}
-        NOZZLE_INFLUXDB_PASSWORD: {{influxdb-password}}
+        NOZZLE_RIEMANN_HOST: {{riemann-host}}
+        NOZZLE_RIEMANN_PORT: {{riemann-port}}
+        NOZZLE_RIEMANN_TRANSPORT: {{riemann-transport}}
         NOZZLE_METRICPREFIX: {{metric-prefix}}
-        NOZZLE_INFLUXDB_USER: {{influxdb-user}}
         NOZZLE_UAAURL: {{uaa-url}}
         NOZZLE_USERNAME: {{username}}
         NOZZLE_PASSWORD: {{password}}
@@ -27,7 +26,7 @@ jobs:
       put: slack
       params:
         text: |
-          :x: FAILED to deploy influxdb-firehose-nozzle on production
+          :x: FAILED to deploy riemann-firehose-nozzle on production
           <$ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
         channel: {{slack-channel}}
         username: {{slack-username}}
@@ -36,20 +35,20 @@ jobs:
       put: slack
       params:
         text: |
-          :white_check_mark: Successfully deployed influxdb-firehose-nozzle on production
+          :white_check_mark: Successfully deployed riemann-firehose-nozzle on production
           <$ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
         channel: {{slack-channel}}
         username: {{slack-username}}
         icon_url: {{slack-icon-url}}
 
 resources:
-- name: influxdb-firehose-nozzle-app
+- name: riemann-firehose-nozzle-app
   type: git
   source:
-    uri: {{influxdb-firehose-nozzle-app-git-url}}
-    branch: {{influxdb-firehose-nozzle-app-git-branch}}
+    uri: {{riemann-firehose-nozzle-app-git-url}}
+    branch: {{riemann-firehose-nozzle-app-git-branch}}
 
-- name: deploy-influxdb-firehose-nozzle-app
+- name: deploy-riemann-firehose-nozzle-app
   type: cf
   source:
     api: {{cf-api-url}}
