@@ -1,33 +1,31 @@
 ---
 jobs:
-- name: push-riemann-firehose-nozzle
+- name: push-riemann-firehose-nozzle-staging
   plan:
-  - aggregate:
-    - get: riemann-firehose-nozzle-app
-      trigger: true
-  - put: deploy-riemann-firehose-nozzle-app
+  - get: riemann-firehose-nozzle-app
+    trigger: true
+  - put: deploy-riemann-firehose-nozzle-staging
     params:
       manifest: riemann-firehose-nozzle-app/manifest.yml
       path: riemann-firehose-nozzle-app
       current_app_name: riemann-firehose-nozzle
       environment_variables:
-        NOZZLE_RIEMANN_HOST: {{riemann-host}}
-        NOZZLE_RIEMANN_PORT: {{riemann-port}}
-        NOZZLE_RIEMANN_TRANSPORT: {{riemann-transport}}
-        NOZZLE_METRICPREFIX: {{metric-prefix}}
-        NOZZLE_UAAURL: {{uaa-url}}
-        NOZZLE_USERNAME: {{username}}
-        NOZZLE_PASSWORD: {{password}}
-        NOZZLE_INSECURESSLSKIPVERIFY: {{insecure-ssl-skip-verify}}
-        NOZZLE_TRAFFICCONTROLLERURL: {{traffic-controller-url}}
-        NOZZLE_DEPLOYMENT: {{cf-deployment}}
-
+        NOZZLE_RIEMANN_HOST: {{riemann-host-staging}}
+        NOZZLE_RIEMANN_PORT: {{riemann-port-staging}}
+        NOZZLE_RIEMANN_TRANSPORT: {{riemann-transport-staging}}
+        NOZZLE_METRICPREFIX: {{metric-prefix-staging}}
+        NOZZLE_UAAURL: {{uaa-url-staging}}
+        NOZZLE_USERNAME: {{username-staging}}
+        NOZZLE_PASSWORD: {{password-staging}}
+        NOZZLE_INSECURESSLSKIPVERIFY: {{insecure-ssl-skip-verify-staging}}
+        NOZZLE_TRAFFICCONTROLLERURL: {{traffic-controller-url-staging}}
+        NOZZLE_DEPLOYMENT: {{cf-deployment-staging}}
     on_failure:
       put: slack
       params:
         text: |
           :x: FAILED to deploy riemann-firehose-nozzle on production
-          <$ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+          <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
         channel: {{slack-channel}}
         username: {{slack-username}}
         icon_url: {{slack-icon-url}}
@@ -36,7 +34,47 @@ jobs:
       params:
         text: |
           :white_check_mark: Successfully deployed riemann-firehose-nozzle on production
-          <$ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+          <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+        channel: {{slack-channel}}
+        username: {{slack-username}}
+        icon_url: {{slack-icon-url}}
+
+- name: push-riemann-firehose-nozzle-production
+  plan:
+  - get: riemann-firehose-nozzle-app
+    passed: [push-riemann-firehose-nozzle-staging]
+    trigger: true
+  - put: deploy-riemann-firehose-nozzle-production
+    params:
+      manifest: riemann-firehose-nozzle-app/manifest.yml
+      path: riemann-firehose-nozzle-app
+      current_app_name: riemann-firehose-nozzle
+      environment_variables:
+        NOZZLE_RIEMANN_HOST: {{riemann-host-production}}
+        NOZZLE_RIEMANN_PORT: {{riemann-port-production}}
+        NOZZLE_RIEMANN_TRANSPORT: {{riemann-transport-production}}
+        NOZZLE_METRICPREFIX: {{metric-prefix-production}}
+        NOZZLE_UAAURL: {{uaa-url-production}}
+        NOZZLE_USERNAME: {{username-production}}
+        NOZZLE_PASSWORD: {{password-production}}
+        NOZZLE_INSECURESSLSKIPVERIFY: {{insecure-ssl-skip-verify-production}}
+        NOZZLE_TRAFFICCONTROLLERURL: {{traffic-controller-url-production}}
+        NOZZLE_DEPLOYMENT: {{cf-deployment-production}}
+    on_failure:
+      put: slack
+      params:
+        text: |
+          :x: FAILED to deploy riemann-firehose-nozzle on production
+          <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+        channel: {{slack-channel}}
+        username: {{slack-username}}
+        icon_url: {{slack-icon-url}}
+    on_success:
+      put: slack
+      params:
+        text: |
+          :white_check_mark: Successfully deployed riemann-firehose-nozzle on production
+          <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
         channel: {{slack-channel}}
         username: {{slack-username}}
         icon_url: {{slack-icon-url}}
@@ -48,14 +86,24 @@ resources:
     uri: {{riemann-firehose-nozzle-app-git-url}}
     branch: {{riemann-firehose-nozzle-app-git-branch}}
 
-- name: deploy-riemann-firehose-nozzle-app
+- name: deploy-riemann-firehose-nozzle-staging
   type: cf
   source:
-    api: {{cf-api-url}}
-    username: {{cf-deploy-username}}
-    password: {{cf-deploy-password}}
-    organization: {{cf-organization}}
-    space: {{cf-space}}
+    api: {{cf-api-url-staging}}
+    username: {{cf-deploy-username-staging}}
+    password: {{cf-deploy-password-staging}}
+    organization: {{cf-organization-staging}}
+    space: {{cf-space-staging}}
+    skip_cert_check: false
+
+- name: deploy-riemann-firehose-nozzle-production
+  type: cf
+  source:
+    api: {{cf-api-url-production}}
+    username: {{cf-deploy-username-production}}
+    password: {{cf-deploy-password-production}}
+    organization: {{cf-organization-production}}
+    space: {{cf-space-production}}
     skip_cert_check: false
 
 - name: slack
