@@ -18,4 +18,5 @@ cat << EOF > metrics-network.json
 EOF
 
 cf create-security-group metrics-network ./metrics-network.json
+cf update-security-group metrics-network ./metrics-network.json
 cf bind-security-group metrics-network "${CF_ORGANIZATION}" "${CF_SPACE}"
