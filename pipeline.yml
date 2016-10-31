@@ -2,8 +2,20 @@
 jobs:
 - name: push-riemann-firehose-nozzle-staging
   plan:
-  - get: riemann-firehose-nozzle-app
-    trigger: true
+  - aggregate:
+    - get: riemann-firehose-nozzle-app
+      trigger: true
+    - get: riemann-firehose-nozzle-config
+      trigger: true
+  - task: setup-security-group-staging
+    file: riemann-firehose-nozzle-config/setup-security-group.yml
+    params:
+      CF_API_URL: {{cf-api-url-staging}}
+      CF_USERNAME: {{cf-deploy-username-staging}}
+      CF_PASSWORD: {{cf-deploy-password-staging}}
+      CF_ORGANIZATION: {{cf-organization-staging}}
+      CF_SPACE: {{cf-space-staging}}
+      RIEMANN_HOST: {{riemann-host-staging}}
   - put: deploy-riemann-firehose-nozzle-staging
     params:
       manifest: riemann-firehose-nozzle-app/manifest.yml
@@ -41,9 +53,22 @@ jobs:
 
 - name: push-riemann-firehose-nozzle-production
   plan:
-  - get: riemann-firehose-nozzle-app
-    passed: [push-riemann-firehose-nozzle-staging]
-    trigger: true
+  - aggregate:
+    - get: riemann-firehose-nozzle-app
+      trigger: true
+      passed: [push-riemann-firehose-nozzle-staging]
+    - get: riemann-firehose-nozzle-config
+      passed: [push-riemann-firehose-nozzle-staging]
+      trigger: true
+  - task: setup-security-group-production
+    file: riemann-firehose-nozzle-config/setup-security-group.yml
+    params:
+      CF_API_URL: {{cf-api-url-production}}
+      CF_USERNAME: {{cf-deploy-username-production}}
+      CF_PASSWORD: {{cf-deploy-password-production}}
+      CF_ORGANIZATION: {{cf-organization-production}}
+      CF_SPACE: {{cf-space-production}}
+      RIEMANN_HOST: {{riemann-host-production}}
   - put: deploy-riemann-firehose-nozzle-production
     params:
       manifest: riemann-firehose-nozzle-app/manifest.yml
@@ -85,6 +110,12 @@ resources:
   source:
     uri: {{riemann-firehose-nozzle-app-git-url}}
     branch: {{riemann-firehose-nozzle-app-git-branch}}
+
+- name: riemann-firehose-nozzle-config
+  type: git
+  source:
+    uri: {{riemann-firehose-nozzle-config-git-url}}
+    branch: {{riemann-firehose-nozzle-config-git-branch}}
 
 - name: deploy-riemann-firehose-nozzle-staging
   type: cf
