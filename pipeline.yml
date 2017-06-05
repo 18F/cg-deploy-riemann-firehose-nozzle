@@ -27,7 +27,7 @@ jobs:
         NOZZLE_RIEMANN_TRANSPORT: {{riemann-transport-staging}}
         NOZZLE_METRICPREFIX: {{metric-prefix-staging}}
         NOZZLE_UAAURL: {{uaa-url-staging}}
-        NOZZLE_USERNAME: {{username-staging}}
+        NOZZLE_USERNAME: influxdb-firehose-nozzle
         NOZZLE_PASSWORD: {{password-staging}}
         NOZZLE_INSECURESSLSKIPVERIFY: {{insecure-ssl-skip-verify-staging}}
         NOZZLE_TRAFFICCONTROLLERURL: {{traffic-controller-url-staging}}
@@ -80,7 +80,7 @@ jobs:
         NOZZLE_RIEMANN_TRANSPORT: {{riemann-transport-production}}
         NOZZLE_METRICPREFIX: {{metric-prefix-production}}
         NOZZLE_UAAURL: {{uaa-url-production}}
-        NOZZLE_USERNAME: {{username-production}}
+        NOZZLE_USERNAME: influxdb-firehose-nozzle
         NOZZLE_PASSWORD: {{password-production}}
         NOZZLE_INSECURESSLSKIPVERIFY: {{insecure-ssl-skip-verify-production}}
         NOZZLE_TRAFFICCONTROLLERURL: {{traffic-controller-url-production}}
