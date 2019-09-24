@@ -2,7 +2,7 @@
 jobs:
 - name: push-riemann-firehose-nozzle-staging
   plan:
-  - aggregate:
+  - in_parallel:
     - get: riemann-firehose-nozzle-app
       trigger: true
     - get: riemann-firehose-nozzle-config
@@ -53,7 +53,7 @@ jobs:
 
 - name: push-riemann-firehose-nozzle-production
   plan:
-  - aggregate:
+  - in_parallel:
     - get: riemann-firehose-nozzle-app
       trigger: true
       passed: [push-riemann-firehose-nozzle-staging]
